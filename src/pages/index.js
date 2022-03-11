@@ -1,12 +1,10 @@
-import React, { useState } from "react"
-import { Link } from "gatsby"
-
-import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
+import React, { useState } from "react";
+import getTemplate from "../components/template";
 
 const IndexPage = () => {
   const [items, setItems] = useState([]);
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [deliveryPrice, setDeliveryPrice] = useState(0);
 
   const formatString = (e) => {
     const text = e.target.value;
@@ -22,7 +20,7 @@ const IndexPage = () => {
       const quantity = parseInt(rowArray.shift());
       const fullPrice = parseInt(rowArray.pop().match(/\d/g).join(""));
       const price = Math.floor(fullPrice / quantity);
-      const name = rowArray.join(" ").substr(2);
+      const name = rowArray.join(" ");
 
       return {
         quantity,
@@ -41,20 +39,45 @@ const IndexPage = () => {
       .filter(row => row.length !== 0 && Number.isInteger(parseInt(row.charAt(0))))
   };
 
-  const formatItems = () => {
-    return items.map(item => {
-      return `{ quantity: ${item.quantity}, name: "${item.name}", price: ${item.price} }`
-    }).join(", ")
-  };
+  const template = getTemplate(
+    items,
+    deliveryDate,
+    deliveryPrice
+  );
 
-  const formatted = `const items = [ ${formatItems()} ]`;
-
+  console.log(items)
+  console.log(template)
   return (
     <div>
       <textarea cols={50} rows={20} onChange={formatString}/>
-      <div>{formatted}</div>
+      <div>
+        <label>Delivery Date</label>
+        <input type="text" name="deliveryDate" placeholder="Delivery Date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)}/>
+      </div>
+      <div>
+        <label>Delivery Price</label>
+        <input type="text" name="deliveryPrice" placeholder="Delivery Price" value={deliveryPrice} onChange={(e) => setDeliveryPrice(e.target.value)}/>
+
+      </div>
+      <a href={`data:text/plain;charset=utf-8,${encodeURIComponent(template)}`} download={`${deliveryDate}.js`}>
+        AAAAAAAAAAAAAA
+      </a>
+      {/*<div>{formatted}</div>*/}
     </div>
   );
 };
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
 
 export default IndexPage
